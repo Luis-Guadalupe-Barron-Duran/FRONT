@@ -27,6 +27,9 @@ const Sidebar = () => {
         <NavLink to="/productos" className={linkClass}>
           <ShoppingBag size={20} /> Productos
         </NavLink>
+         <NavLink to="/login" className={linkClass}>
+          <ShoppingBag size={20} /> login
+        </NavLink>
       </nav>
 
       {/* Footer */}

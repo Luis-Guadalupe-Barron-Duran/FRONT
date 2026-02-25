@@ -9,7 +9,7 @@ const Productos = () => {
 
   useEffect(() => {
     cargarProductos();
-  }, []);
+  }, []);//los corchetes esperan a que se renderize el componente para ejecutar la función cargarProductos
 
   const cargarProductos = async () => {
     try {

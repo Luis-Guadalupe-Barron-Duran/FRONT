@@ -6,6 +6,15 @@ const Productos = () => {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [cargandoForm, setCargandoForm] = useState(false);
+  const [formData, setFormData] = useState({
+    nombre: '',
+    precio: '',
+    stock: '',
+    descripcion: '',
+    imagen_url: ''
+  });
 
   useEffect(() => {
     cargarProductos();
@@ -19,6 +28,42 @@ const Productos = () => {
       setError("No se pudo conectar con el servidor. ¿Está encendido?");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const agregarProducto = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.nombre || !formData.precio || !formData.stock) {
+      alert('Completa los campos requeridos: nombre, precio y stock');
+      return;
+    }
+
+    setCargandoForm(true);
+    try {
+      await api.post('/productos', {
+        nombre: formData.nombre,
+        precio: parseFloat(formData.precio),
+        stock: parseInt(formData.stock),
+        descripcion: formData.descripcion,
+        imagen_url: formData.imagen_url
+      });
+      
+      // Limpiar formulario y cargar productos
+      setFormData({
+        nombre: '',
+        precio: '',
+        stock: '',
+        descripcion: '',
+        imagen_url: ''
+      });
+      setMostrarFormulario(false);
+      cargarProductos();
+      alert('¡Producto agregado exitosamente!');
+    } catch (err) {
+      alert('Error al agregar el producto');
+    } finally {
+      setCargandoForm(false);
     }
   };
 

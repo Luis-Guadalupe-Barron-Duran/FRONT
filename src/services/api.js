@@ -4,7 +4,13 @@ const API_URL = "http://localhost:4000/api"; // Importante colocar la url de tu 
 export const api = {
   get: async (endpoint) => {
     try {
-      const response = await fetch(`${API_URL}${endpoint}`);
+      const response = await fetch(`${API_URL}${endpoint}`,{
+     //   headers: {
+     //     'Authorization': token ? `Bearer ${token}`: '',
+     //     'Content-Type': 
+     //   }
+      });
+      
       if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
       return await response.json();
     } catch (error) {
@@ -20,6 +26,10 @@ export const api = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
+        //true ? '' : ''
+        //Authorization: `Bearer ${token}`
+        //                 tipo    valor
+        // Bearer: token
       });
       if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
       return await response.json();

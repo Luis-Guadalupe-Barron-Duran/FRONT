@@ -6,7 +6,6 @@ const Productos = () => {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [cargandoForm, setCargandoForm] = useState(false);
   const [formData, setFormData] = useState({
     nombre: '',
@@ -57,7 +56,6 @@ const Productos = () => {
         descripcion: '',
         imagen_url: ''
       });
-      setMostrarFormulario(false);
       cargarProductos();
       alert('¡Producto agregado exitosamente!');
     } catch (err) {
@@ -89,6 +87,70 @@ const Productos = () => {
           {productos.length} items
         </span>
       </header>
+
+      <div className="mb-6">
+        <button
+          type="button"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+        >
+          Nuevo
+        </button>
+      </div>
+
+      <form onSubmit={agregarProducto} className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm space-y-3">
+        <h2 className="text-lg font-semibold text-blue-900">Nuevo producto</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input
+              type="text"
+              placeholder="Nombre *"
+              value={formData.nombre}
+              onChange={(e) => setFormData((prev) => ({ ...prev, nombre: e.target.value }))}
+              className="border border-slate-300 rounded-lg px-3 py-2 text-sm"
+              required
+            />
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Precio *"
+              value={formData.precio}
+              onChange={(e) => setFormData((prev) => ({ ...prev, precio: e.target.value }))}
+              className="border border-slate-300 rounded-lg px-3 py-2 text-sm"
+              required
+            />
+            <input
+              type="number"
+              placeholder="Stock *"
+              value={formData.stock}
+              onChange={(e) => setFormData((prev) => ({ ...prev, stock: e.target.value }))}
+              className="border border-slate-300 rounded-lg px-3 py-2 text-sm"
+              required
+            />
+            <input
+              type="url"
+              placeholder="URL de imagen"
+              value={formData.imagen_url}
+              onChange={(e) => setFormData((prev) => ({ ...prev, imagen_url: e.target.value }))}
+              className="border border-slate-300 rounded-lg px-3 py-2 text-sm"
+            />
+          </div>
+
+          <textarea
+            placeholder="Descripcion"
+            value={formData.descripcion}
+            onChange={(e) => setFormData((prev) => ({ ...prev, descripcion: e.target.value }))}
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+            rows={3}
+          />
+
+        <button
+          type="submit"
+          disabled={cargandoForm}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+        >
+          {cargandoForm ? 'Guardando...' : 'Guardar producto'}
+        </button>
+      </form>
 
       {/* Grid Responsivo: 1 col móvil, 2 tablet, 3 desktop */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

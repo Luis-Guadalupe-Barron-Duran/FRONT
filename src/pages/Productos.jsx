@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { ShoppingBag, Loader, AlertCircle } from 'lucide-react';
-
+import {MapContainer, TileLayer, Marker, Popup} from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 const Productos = () => {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,7 +15,9 @@ const Productos = () => {
     descripcion: '',
     imagen_url: '',
     id_categoria: '',
-    youtube_id: ''
+    youtube_id: '',
+    latitud:'',
+    longitud:''
   });
 
   useEffect(() => {
@@ -35,7 +38,7 @@ const Productos = () => {
   const agregarProducto = async (e) => {
     e.preventDefault();
     
-    if (!formData.nombre || !formData.precio || !formData.stock) {
+    if (data) {
       alert('Completa los campos requeridos: nombre, precio y stock');
       return;
     }
@@ -49,7 +52,9 @@ const Productos = () => {
         descripcion: formData.descripcion,
         id_categoria: formData.id_categoria || null,
         youtube_id: formData.youtube_id || null,
-        imagen_url: formData.imagen_url
+        imagen_url: formData.imagen_url,
+        latitud: parseFloat(formData.latitud),
+        longitud: parseFloat(formData.longitud)
       });
       
       // Limpiar formulario y cargar productos
@@ -60,9 +65,11 @@ const Productos = () => {
         descripcion: '',
         imagen_url: '',
         id_categoria: '',
-        youtube_id: ''
+        youtube_id: '',
+        latitud:'',
+        longitud:''
       });
-      cargarProductos();
+       cargarProductos();
       alert('¡Producto agregado exitosamente!');
     } catch (err) {
       alert('Error al agregar el producto');
@@ -146,6 +153,23 @@ const Productos = () => {
               onChange={(e) => setFormData((prev) => ({ ...prev, youtube_id: e.target.value }))}
               className="border border-slate-300 rounded-lg px-3 py-2 text-sm"
             />
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Latitud *"
+              value={formData.latitud}
+              onChange={(e) => setFormData((prev) => ({ ...prev, precio: e.target.value }))}
+              className="border border-slate-300 rounded-lg px-3 py-2 text-sm"
+            />
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Longitud *"
+              value={formData.longitud}
+              onChange={(e) => setFormData((prev) => ({ ...prev, precio: e.target.value }))}
+              className="border border-slate-300 rounded-lg px-3 py-2 text-sm"
+              
+            />
           </div>
 
           <textarea
@@ -206,6 +230,22 @@ const Productos = () => {
                 </button>
               </div>
             </div>
+           {/* Mapa */}
+            <div className="h-48 p-4 bg-white flex items-center justify-center border-b border-slate-50">
+            <MapContainer center={[prod.latitud || 20.5287576 , prod.longitud || -100.3172998]} zoom={13} style={{ height: "100%", width: "100%" , zIndex: 0}}>
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; OpenStreetMap'
+              />
+              <Marker position={[prod.latitud || 20.5287576 , prod.longitud || -100.3172998]}>
+                <Popup>
+                  Ubicacion de: <br /> {prod.nombre}
+                </Popup>
+              </Marker>
+              </MapContainer>
+           
+            </div>
+          
           </div>
         ))}
       </div>

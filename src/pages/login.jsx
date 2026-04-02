@@ -15,7 +15,7 @@ export default function Login() {
     setLoading(true);
     
     try {
-      const data = await api.post('/auth/login', { email, password });
+      const data = await api.post('/api/auth/login', { email, password });
       localStorage.setItem('token', data.token); //objeto clave-valor
       navigate('/productos');
     } catch (err) {

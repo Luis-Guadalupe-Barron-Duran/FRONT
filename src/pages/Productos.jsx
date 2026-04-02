@@ -45,7 +45,7 @@ const Productos = () => {
 
     setCargandoForm(true);
     try {
-      await api.post('/productos', {
+      await api.post('/api/productos', {
         nombre: formData.nombre,
         precio: parseFloat(formData.precio),
         stock: parseInt(formData.stock),

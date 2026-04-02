@@ -26,7 +26,7 @@ const Productos = () => {
 
   const cargarProductos = async () => {
     try {
-      const data = await api.get('/productos'); 
+      const data = await api.get('/api/productos'); 
       setProductos(data);
     } catch (error) {
       setError("No se pudo conectar con el servidor. ¿Está encendido?");

@@ -1,4 +1,10 @@
-const API_URL = import.meta.env.VITE_API_URL  // Importante colocar la url de tu api
+const rawApiUrl = import.meta.env.VITE_API_URL?.trim();
+
+if (!rawApiUrl) {
+  throw new Error('Falta VITE_API_URL. Configura esta variable en tu entorno.');
+}
+
+const API_URL = rawApiUrl.replace(/\/$/, '');
 
 
 export const api = {

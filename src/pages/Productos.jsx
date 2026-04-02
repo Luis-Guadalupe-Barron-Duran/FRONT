@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api';
-import { ShoppingBag, Loader, AlertCircle } from 'lucide-react';
 import {MapContainer, TileLayer, Marker, Popup} from 'react-leaflet';
+import { ShoppingBag, Loader, AlertCircle, MessageCircle, Twitter, Share2 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 const Productos = () => {
   const [productos, setProductos] = useState([]);
@@ -28,7 +28,7 @@ const Productos = () => {
     try {
       const data = await api.get('/productos'); 
       setProductos(data);
-    } catch (err) {
+    } catch (error) {
       setError("No se pudo conectar con el servidor. ¿Está encendido?");
     } finally {
       setLoading(false);
@@ -71,7 +71,7 @@ const Productos = () => {
       });
        cargarProductos();
       alert('¡Producto agregado exitosamente!');
-    } catch (err) {
+    } catch (error) {
       alert('Error al agregar el producto');
     } finally {
       setCargandoForm(false);
@@ -90,8 +90,23 @@ const Productos = () => {
     </div>
   );
 
+  const compartirWhatsApp=(producto)=>{
+    const mensaje= `!wacha en la ienda\n\n ${producto.nombre}\n $${producto.precio}\n\n ¿Te interesa?`;
+
+    const textoCodificado = encodeURIComponent(mensaje);
+
+    window.open(`https://api.whatsapp.com/send?text =${textoCodificado}`, '_blank');
+  };
+
+  const compartirTwitter=(producto)=>{
+    const mensaje= `!wacha en la i\n\n ${producto.nombre}\n $${producto.precio}\n\n ¿Te interesa?`;
+
+    const textoCodificado = encodeURIComponent(mensaje);
+    window.open(`https://twitter.com/intent/tweet?text=${textoCodificado}`, '_blank');
+
+  };
   return (
-    <div>
+    <div >
       <header className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-2">
           <ShoppingBag className="text-blue-600" /> Inventario
@@ -229,6 +244,29 @@ const Productos = () => {
                   Editar
                 </button>
               </div>
+
+              {/* NUEVO: Barra de Redes Sociales */}
+              <div className="pt-3 flex justify-between items-center bg-slate-50 -mx-4 -mb-4 px-4 py-3 rounded-b-xl border-t border-slate-100">
+                <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                  <Share2 size={14} /> Compartir:
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => compartirWhatsApp(prod)}
+                    className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-full transition shadow-sm"
+                    title="Compartir en WhatsApp"
+                  >
+                    <MessageCircle size={16} />
+                  </button>
+                  <button
+                    onClick={() => compartirTwitter(prod)}
+                    className="bg-black hover:bg-slate-800 text-white p-2 rounded-full transition shadow-sm"
+                    title="Compartir en X (Twitter)"
+                  >
+                    <Twitter size={16} />
+                  </button>
+                </div>
+              </div>
             </div>
            {/* Mapa */}
             <div className="h-48 p-4 bg-white flex items-center justify-center border-b border-slate-50">
@@ -244,12 +282,14 @@ const Productos = () => {
               </Marker>
               </MapContainer>
            
-            </div>
+            
           
           </div>
+             </div>
         ))}
       </div>
     </div>
+       
   );
 };
 

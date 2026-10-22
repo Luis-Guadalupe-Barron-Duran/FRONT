@@ -21,7 +21,7 @@ const Sidebar = () => {
       {/* Header */}
       <div className="p-6 border-b border-slate-700">
         <h1 className="text-2xl font-bold tracking-wider">
-          ADMIN<span className="text-blue-500">PRO</span>
+          PAPULANDIA API<span className="text-blue-500">PROMAX</span>
         </h1>
         <p className="text-xs text-slate-500 mt-1">Panel de Control v1.0</p>
       </div>

@@ -18,7 +18,7 @@ export default function Login() {
       const data = await api.post('/api/auth/login', { email, password });
       localStorage.setItem('token', data.token); //objeto clave-valor
       navigate('/productos');
-    } catch (err) {
+    } catch {
       setError('Credenciales incorrectas. Intenta de nuevo.');
     } finally {
       setLoading(false);

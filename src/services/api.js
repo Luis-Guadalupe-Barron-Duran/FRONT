@@ -1,45 +1,45 @@
-const API_URL = import.meta.env.VITE_API_URL  // Importante colocar la url de tu api
+const API_URL = import.meta.env.VITE_API_URL;
 
-
-export const api = {
-  get: async (endpoint) => {
-    try {
-      const response = await fetch(`${API_URL}${endpoint}`,{
-     //   headers: {
-     //     'Authorization': token ? `Bearer ${token}`: '',
-     //     'Content-Type': 
-     //   }
-      });
-      
-      if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-      return await response.json();
-    } catch (error) {
-      console.error("Error en GET:", error);
-      throw error;
+const request = async (endpoint, options = {}) => {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options.headers
     }
-  },
+  });
 
-  
-  post: async (endpoint, body) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify(body)
-        //true ? '' : ''
-        //Authorization: `Bearer ${token}`
-        //                 tipo    valor
-        // Bearer: token
-      });
-      if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-      return await response.json();
-    } catch (error) {
-      console.error("Error en POST:", error);
-      throw error;
+  if (response.status === 401) {
+    localStorage.removeItem('token');
+    if (window.location.pathname !== '/login') {
+      window.location.assign('/login');
     }
   }
+
+  if (!response.ok) {
+    let message = `Error HTTP: ${response.status}`;
+    try {
+      const body = await response.json();
+      message = body.error || body.msg || message;
+    } catch {
+      // Keep the HTTP status when the server does not return JSON.
+    }
+    throw new Error(message);
+  }
+
+  return response.json();
+};
+
+export const api = {
+  get: (endpoint) => request(endpoint),
+  post: (endpoint, body) => request(endpoint, {
+    method: 'POST',
+    body: JSON.stringify(body)
+  }),
+  put: (endpoint, body) => request(endpoint, {
+    method: 'PUT',
+    body: JSON.stringify(body)
+  })
 };

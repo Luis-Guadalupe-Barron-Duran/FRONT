@@ -8,6 +8,7 @@ const Productos = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cargandoForm, setCargandoForm] = useState(false);
+  const [productoEditando, setProductoEditando] = useState(null);
   const [formData, setFormData] = useState({
     nombre: '',
     precio: '',
@@ -28,7 +29,7 @@ const Productos = () => {
     try {
       const data = await api.get('/api/productos'); 
       setProductos(data);
-    } catch (error) {
+    } catch {
       setError("No se pudo conectar con el servidor. ¿Está encendido?");
     } finally {
       setLoading(false);
@@ -38,14 +39,14 @@ const Productos = () => {
   const agregarProducto = async (e) => {
     e.preventDefault();
     
-    if (data) {
+    if (!formData.nombre.trim() || formData.precio === '' || formData.stock === '') {
       alert('Completa los campos requeridos: nombre, precio y stock');
       return;
     }
 
     setCargandoForm(true);
     try {
-      await api.post('/api/productos', {
+      const producto = {
         nombre: formData.nombre,
         precio: parseFloat(formData.precio),
         stock: parseInt(formData.stock),
@@ -53,29 +54,55 @@ const Productos = () => {
         id_categoria: formData.id_categoria || null,
         youtube_id: formData.youtube_id || null,
         imagen_url: formData.imagen_url,
-        latitud: parseFloat(formData.latitud),
-        longitud: parseFloat(formData.longitud)
-      });
+        latitud: formData.latitud === '' ? null : parseFloat(formData.latitud),
+        longitud: formData.longitud === '' ? null : parseFloat(formData.longitud)
+      };
+      if (productoEditando) {
+        await api.put(`/api/productos/${productoEditando.id}`, producto);
+      } else {
+        await api.post('/api/productos', producto);
+      }
       
       // Limpiar formulario y cargar productos
-      setFormData({
-        nombre: '',
-        precio: '',
-        stock: '',
-        descripcion: '',
-        imagen_url: '',
-        id_categoria: '',
-        youtube_id: '',
-        latitud:'',
-        longitud:''
-      });
-       cargarProductos();
-      alert('¡Producto agregado exitosamente!');
+      cancelarEdicion();
+      await cargarProductos();
+      alert(productoEditando ? '¡Producto actualizado exitosamente!' : '¡Producto agregado exitosamente!');
     } catch (error) {
-      alert('Error al agregar el producto');
+      alert(error.message || 'Error al guardar el producto');
     } finally {
       setCargandoForm(false);
     }
+  };
+
+  const editarProducto = (producto) => {
+    setProductoEditando(producto);
+    setFormData({
+      nombre: producto.nombre || '',
+      precio: producto.precio ?? '',
+      stock: producto.stock ?? '',
+      descripcion: producto.descripcion || '',
+      imagen_url: producto.imagen_url || '',
+      id_categoria: producto.id_categoria || '',
+      youtube_id: producto.youtube_id || '',
+      latitud: producto.latitud ?? '',
+      longitud: producto.longitud ?? ''
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelarEdicion = () => {
+    setProductoEditando(null);
+    setFormData({
+      nombre: '',
+      precio: '',
+      stock: '',
+      descripcion: '',
+      imagen_url: '',
+      id_categoria: '',
+      youtube_id: '',
+      latitud: '',
+      longitud: ''
+    });
   };
 
   if (loading) return (
@@ -119,6 +146,7 @@ const Productos = () => {
       <div className="mb-6">
         <button
           type="button"
+          onClick={cancelarEdicion}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
         >
           Nuevo
@@ -126,7 +154,9 @@ const Productos = () => {
       </div>
 
       <form onSubmit={agregarProducto} className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm space-y-3">
-        <h2 className="text-lg font-semibold text-blue-900">Nuevo producto</h2>
+        <h2 className="text-lg font-semibold text-blue-900">
+          {productoEditando ? 'Editar producto' : 'Nuevo producto'}
+        </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <input
@@ -140,6 +170,7 @@ const Productos = () => {
             <input
               type="number"
               step="0.01"
+              min="0"
               placeholder="Precio *"
               value={formData.precio}
               onChange={(e) => setFormData((prev) => ({ ...prev, precio: e.target.value }))}
@@ -148,6 +179,7 @@ const Productos = () => {
             />
             <input
               type="number"
+              min="0"
               placeholder="Stock *"
               value={formData.stock}
               onChange={(e) => setFormData((prev) => ({ ...prev, stock: e.target.value }))}
@@ -170,18 +202,22 @@ const Productos = () => {
             />
             <input
               type="number"
-              step="0.01"
+              step="0.000001"
+              min="-90"
+              max="90"
               placeholder="Latitud *"
               value={formData.latitud}
-              onChange={(e) => setFormData((prev) => ({ ...prev, precio: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, latitud: e.target.value }))}
               className="border border-slate-300 rounded-lg px-3 py-2 text-sm"
             />
             <input
               type="number"
-              step="0.01"
+              step="0.000001"
+              min="-180"
+              max="180"
               placeholder="Longitud *"
               value={formData.longitud}
-              onChange={(e) => setFormData((prev) => ({ ...prev, precio: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, longitud: e.target.value }))}
               className="border border-slate-300 rounded-lg px-3 py-2 text-sm"
               
             />
@@ -200,8 +236,17 @@ const Productos = () => {
           disabled={cargandoForm}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
         >
-          {cargandoForm ? 'Guardando...' : 'Guardar producto'}
+          {cargandoForm ? 'Guardando...' : productoEditando ? 'Actualizar producto' : 'Guardar producto'}
         </button>
+        {productoEditando && (
+          <button
+            type="button"
+            onClick={cancelarEdicion}
+            className="ml-2 bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold"
+          >
+            Cancelar
+          </button>
+        )}
       </form>
 
       {/* Grid Responsivo: 1 col móvil, 2 tablet, 3 desktop */}
@@ -240,7 +285,11 @@ const Productos = () => {
                 <span className="text-xs font-medium text-slate-400">
                   Stock: <span className={prod.stock < 10 ? "text-red-500 font-bold" : "text-slate-600"}>{prod.stock}</span>
                 </span>
-                <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+                <button
+                  type="button"
+                  onClick={() => editarProducto(prod)}
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                >
                   Editar
                 </button>
               </div>
